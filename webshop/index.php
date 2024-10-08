@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['logged_in'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php");
     exit;
 }
 ?>
@@ -12,13 +12,18 @@ if (!isset($_SESSION['logged_in'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welkom</title>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Welkom op de shop!</h1>
-        <p>Je bent succesvol ingelogd.</p>
-        <a href="logout.php">Uitloggen</a>
+        <div class="form-container">
+            <h1>Webshop!</h1>
+            <p>Je bent succesvol ingelogd.</p>
+            <div class="logout-btn-container">
+                <a href="logout.php"><button class="logout-btn">Uitloggen</button></a>
+            </div>
+        </div>
     </div>
 </body>
 </html>

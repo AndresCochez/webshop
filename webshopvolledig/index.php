@@ -24,13 +24,14 @@ include 'db.php';
             <a class="navbar-brand" href="#">Webshop</a>
             <div class="ms-auto">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <span class="text-white me-3">Balance: 
-                        <?php
-                        $stmt = $pdo->prepare("SELECT balance FROM users WHERE id = ?");
-                        $stmt->execute([$_SESSION['user_id']]);
-                        echo $stmt->fetchColumn() . " units";
-                        ?>
-                    </span>
+                    <?php
+                    // Haal gebruikersinformatie op uit de database
+                    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $user = $stmt->fetch();
+                    ?>
+                    <span class="text-white me-3">Welcome, <?php echo htmlspecialchars($user['username']); ?></span>
+                    <span class="text-white me-3">Balance: <?php echo $user['balance']; ?> units</span>
                     <a href="logout.php" class="btn btn-outline-light">Logout</a>
                 <?php else: ?>
                     <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>

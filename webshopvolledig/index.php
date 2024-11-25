@@ -30,9 +30,24 @@ include 'db.php';
                     $stmt->execute([$_SESSION['user_id']]);
                     $user = $stmt->fetch();
                     ?>
-                    <span class="text-white me-3">Welcome, <?php echo htmlspecialchars($user['username']); ?></span>
-                    <span class="text-white me-3">Balance: <?php echo $user['balance']; ?> units</span>
-                    <a href="logout.php" class="btn btn-outline-light">Logout</a>
+                    <!-- Dropdown-menu -->
+                    <div class="dropdown">
+                        <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Welcome, <?php echo htmlspecialchars($user['username']); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item">Balance: <?php echo $user['balance']; ?> units</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="logout.php">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
                 <?php else: ?>
                     <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
                     <button class="btn btn-outline-light ms-2" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
@@ -44,57 +59,7 @@ include 'db.php';
     <!-- Hoofdinhoud -->
     <div class="container mt-5">
         <h1>Welcome to the Webshop</h1>
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <p>Start shopping with your balance!</p>
-
-            <!-- Wachtwoord wijzigen -->
-            <div class="mt-5">
-                <h2>Change Password</h2>
-                <?php
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
-                    $current_password = $_POST['current_password'];
-                    $new_password = $_POST['new_password'];
-                    $confirm_password = $_POST['confirm_password'];
-
-                    // Haal de gebruiker op uit de database
-                    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $user_password = $stmt->fetchColumn();
-
-                    // Controleer het huidige wachtwoord
-                    if ($user_password && password_verify($current_password, $user_password)) {
-                        if ($new_password === $confirm_password) {
-                            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                            $update_stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
-                            $update_stmt->execute([$hashed_password, $_SESSION['user_id']]);
-                            echo "<div class='alert alert-success'>Password successfully changed!</div>";
-                        } else {
-                            echo "<div class='alert alert-danger'>New passwords do not match!</div>";
-                        }
-                    } else {
-                        echo "<div class='alert alert-danger'>Current password is incorrect!</div>";
-                    }
-                }
-                ?>
-                <form method="post" action="">
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label">Current Password</label>
-                        <input type="password" name="current_password" id="currentPassword" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label">New Password</label>
-                        <input type="password" name="new_password" id="newPassword" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                        <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required>
-                    </div>
-                    <button type="submit" name="change_password" class="btn btn-primary">Change Password</button>
-                </form>
-            </div>
-        <?php else: ?>
-            <p>Browse and shop your favorite items!</p>
-        <?php endif; ?>
+        <p>Browse and shop your favorite items!</p>
     </div>
 
     <!-- Login Modal -->
@@ -181,6 +146,59 @@ include 'db.php';
                             <input type="password" name="password" id="registerPassword" class="form-control" required>
                         </div>
                         <button type="submit" name="register" class="btn btn-success w-100">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+                        $current_password = $_POST['current_password'];
+                        $new_password = $_POST['new_password'];
+                        $confirm_password = $_POST['confirm_password'];
+
+                        $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+                        $stmt->execute([$_SESSION['user_id']]);
+                        $user_password = $stmt->fetchColumn();
+
+                        if ($user_password && password_verify($current_password, $user_password)) {
+                            if ($new_password === $confirm_password) {
+                                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                                $update_stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                                $update_stmt->execute([$hashed_password, $_SESSION['user_id']]);
+                                echo "<div class='alert alert-success'>Password successfully changed!</div>";
+                            } else {
+                                echo "<div class='alert alert-danger'>New passwords do not match!</div>";
+                            }
+                        } else {
+                            echo "<div class='alert alert-danger'>Current password is incorrect!</div>";
+                        }
+                    }
+                    ?>
+                    <form method="post" action="">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" name="current_password" id="currentPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" name="new_password" id="newPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required>
+                        </div>
+                        <button type="submit" name="change_password" class="btn btn-primary w-100">Change Password</button>
                     </form>
                 </div>
             </div>

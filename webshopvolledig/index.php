@@ -46,6 +46,52 @@ include 'db.php';
         <h1>Welcome to the Webshop</h1>
         <?php if (isset($_SESSION['user_id'])): ?>
             <p>Start shopping with your balance!</p>
+
+            <!-- Wachtwoord wijzigen -->
+            <div class="mt-5">
+                <h2>Change Password</h2>
+                <?php
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+                    $current_password = $_POST['current_password'];
+                    $new_password = $_POST['new_password'];
+                    $confirm_password = $_POST['confirm_password'];
+
+                    // Haal de gebruiker op uit de database
+                    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $user_password = $stmt->fetchColumn();
+
+                    // Controleer het huidige wachtwoord
+                    if ($user_password && password_verify($current_password, $user_password)) {
+                        if ($new_password === $confirm_password) {
+                            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                            $update_stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                            $update_stmt->execute([$hashed_password, $_SESSION['user_id']]);
+                            echo "<div class='alert alert-success'>Password successfully changed!</div>";
+                        } else {
+                            echo "<div class='alert alert-danger'>New passwords do not match!</div>";
+                        }
+                    } else {
+                        echo "<div class='alert alert-danger'>Current password is incorrect!</div>";
+                    }
+                }
+                ?>
+                <form method="post" action="">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" name="current_password" id="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" name="new_password" id="newPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" name="change_password" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
         <?php else: ?>
             <p>Browse and shop your favorite items!</p>
         <?php endif; ?>

@@ -58,9 +58,29 @@ include 'db.php';
 
     <!-- Hoofdinhoud -->
     <div class="container mt-5">
-        <h1>Welcome to the Webshop</h1>
-        <p>Browse and shop your favorite items!</p>
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <?php
+            // Controleer de gebruikersrol
+            $stmt = $pdo->prepare("SELECT username, is_admin FROM users WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $user = $stmt->fetch();
+
+            if ($user['username'] === 'admin' || $user['is_admin'] == 1): ?>
+                <!-- Admin Dashboard -->
+                <h1>Admin Dashboard</h1>
+                <?php include 'admin_dashboard.php'; ?>
+            <?php else: ?>
+                <!-- User Dashboard -->
+                <h1>User Dashboard</h1>
+                <?php include 'user_dashboard.php'; ?>
+            <?php endif; ?>
+        <?php else: ?>
+            <!-- Standaard inhoud voor niet-ingelogde gebruikers -->
+            <h1>Welcome to the Webshop</h1>
+            <p>Browse and shop your favorite items!</p>
+        <?php endif; ?>
     </div>
+
 
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">

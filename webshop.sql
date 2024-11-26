@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 25 nov 2024 om 17:54
+-- Gegenereerd op: 26 nov 2024 om 21:50
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.2.12
 
@@ -31,6 +31,16 @@ CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`) VALUES
+(1, 'Hot drinks'),
+(2, 'Cold drinks'),
+(3, 'Food'),
+(4, 'Accessories');
 
 -- --------------------------------------------------------
 
@@ -73,6 +83,14 @@ CREATE TABLE `products` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Gegevens worden geëxporteerd voor tabel `products`
+--
+
+INSERT INTO `products` (`id`, `title`, `description`, `price`, `image`, `category_id`, `created_at`) VALUES
+(14, 'Test', 'Test', 5.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 1, '2024-11-26 20:48:23'),
+(15, 'Test 2', 'Test 2', 10.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 2, '2024-11-26 20:49:10');
+
 -- --------------------------------------------------------
 
 --
@@ -109,7 +127,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `balance`, `is_admin`, `created_at`) VALUES
-(1, 'admin', 'admin@admin.com', '$2y$10$4U2HT0ivPN1FNIQVjkTHi.H/OeiOz7wf90PR0BIJFAS/92dT9Pzvy', 1000.00, 0, '2024-11-25 16:36:38');
+(1, 'admin', 'admin@admin.com', '$2y$10$t7T1M6pRg1uiyRELIfpVYOmE0n/ekV3w/p65sppDT6mJ1SRfOgG.e', 1000.00, 0, '2024-11-25 16:36:38'),
+(2, 'user', 'user@user.com', '$2y$10$0eLoRYPVMoj6EN667crOQedrmZEjDfuB6iZsfdbx5Gcn8puuMLo2y', 1000.00, 0, '2024-11-25 21:52:11');
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -167,7 +186,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT voor een tabel `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT voor een tabel `orders`
@@ -185,7 +204,7 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT voor een tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT voor een tabel `reviews`
@@ -197,7 +216,7 @@ ALTER TABLE `reviews`
 -- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Beperkingen voor geëxporteerde tabellen

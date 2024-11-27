@@ -52,7 +52,7 @@ $products = $stmt->fetchAll();
     </div>
 </div>
 
-<!-- Productoverzicht -->
+<!-- Product overview -->
 <div class="row">
     <?php
     if ($products) {
@@ -60,13 +60,17 @@ $products = $stmt->fetchAll();
             echo "
             <div class='col-md-4 mb-3'>
                 <div class='card'>
-                    <img src='{$product['image']}' class='card-img-top' alt='{$product['title']}' style='height: 200px; object-fit: cover;'>
-                    <div class='card-body'>
-                        <h5 class='card-title'>{$product['title']}</h5>
-                        <p class='card-text'>{$product['description']}</p>
-                        <p class='card-text'><strong>Price:</strong> € {$product['price']}</p>
-                        <p class='card-text'><small class='text-muted'>Category: {$product['category_name']}</small></p>
-                    </div>
+                    <a href='product_details.php?id={$product['id']}' style='text-decoration: none; color: inherit;'>
+                        <div class='image-wrapper' style='height: 200px; overflow: hidden;'>
+                            <img src='{$product['image']}' class='card-img-top' alt='{$product['title']}' style='width: 100%; height: 100%; object-fit: cover;'>
+                        </div>
+                        <div class='card-body'>
+                            <h5 class='card-title'>{$product['title']}</h5>
+                            <p class='card-text'>{$product['description']}</p>
+                            <p class='card-text'><strong>Price:</strong> € {$product['price']}</p>
+                            <p class='card-text'><small class='text-muted'>Category: {$product['category_name']}</small></p>
+                        </div>
+                    </a>
                 </div>
             </div>";
         }

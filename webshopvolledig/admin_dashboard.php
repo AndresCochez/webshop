@@ -102,12 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     </div>
 </div>
 
-
-
-
-
-
-
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
     $product_id = $_POST['delete_product_id'];
@@ -194,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
                 <div class='card-body'>
                     <h5 class='card-title'>{$product['title']}</h5>
                     <p class='card-text'>{$product['description']}</p>
-                    <p class='card-text'><strong>Price:</strong> $ {$product['price']}</p>
+                    <p class='card-text'><strong>Price:</strong> € {$product['price']}</p>
                     <p class='card-text'><small class='text-muted'>Category: {$product['category_name']}</small></p>
                     <button type='button' class='btn btn-secondary' data-bs-toggle='modal' data-bs-target='#editProductModal{$product['id']}'>
                         Edit

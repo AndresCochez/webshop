@@ -21,12 +21,19 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['cart'])) {
         // Leeg het winkelmandje
         unset($_SESSION['cart']);
         $pdo->commit();
-        echo "Bestelling succesvol geplaatst!";
+
+        // Zet een succesmelding in de sessie
+        $_SESSION['order_success'] = "Bestelling succesvol geplaatst!";
+        header("Location: user_dashboard.php.php"); // Redirect naar dashboard
+        exit();
     } catch (Exception $e) {
         $pdo->rollBack();
-        echo "Fout bij het plaatsen van de bestelling: " . $e->getMessage();
+        $_SESSION['order_error'] = "Fout bij het plaatsen van de bestelling: " . $e->getMessage();
+        header("Location: user_dashboard.php"); // Redirect naar dashboard
+        exit();
     }
 } else {
-    echo "Uw winkelmandje is leeg of u bent niet ingelogd.";
+    $_SESSION['order_error'] = "Uw winkelmandje is leeg of u bent niet ingelogd.";
+    header("Location: user_dashboard.php"); // Redirect naar dashboard
+    exit();
 }
-?>

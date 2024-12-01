@@ -86,6 +86,9 @@ include 'db.php';
                                             <a class="dropdown-item">Balance: €<?php echo number_format($user['balance'], 2); ?></a>
                                         </li>
                                         <li>
+                                            <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
+                                        </li>
+                                        <li>
                                             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>

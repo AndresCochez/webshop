@@ -1,6 +1,32 @@
 <?php
 session_start();
-require_once 'db.php';
+include 'db.php';
+
+// Controleer of de gebruiker is ingelogd
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$orderId = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
+$userId = $_SESSION['user_id'];
+
+// Haal de details van de bestelling op
+$query = $pdo->prepare("
+    SELECT p.title, p.price, oi.quantity, (oi.quantity * p.price) AS subtotal
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.id
+    WHERE oi.order_id = ? AND EXISTS (
+        SELECT 1 FROM orders o WHERE o.id = oi.order_id AND o.user_id = ?
+    )
+");
+$query->execute([$orderId, $userId]);
+$orderItems = $query->fetchAll(PDO::FETCH_ASSOC);
+
+if (!$orderItems) {
+    echo "Bestelling niet gevonden of u heeft geen toegang.";
+    exit();
+}
 
 // Haal productinformatie op
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -23,7 +49,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['title'] ?? 'Productdetails'); ?></title>
+    <title>Details van Bestelling #<?php echo $orderId; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -70,25 +96,6 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </nav>
 
-    <!-- Productdetails -->
-    <div class="container mt-5">
-        <?php if ($product): ?>
-            <h1><?php echo htmlspecialchars($product['title']); ?></h1>
-            <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['title']); ?>" style="max-width: 100%; height: auto;">
-            <p><?php echo htmlspecialchars($product['description']); ?></p>
-            <p><strong>Prijs:</strong> € <?php echo number_format($product['price'], 2); ?></p>
-            <p><strong>Categorie:</strong> <?php echo htmlspecialchars($product['category_name']); ?></p>
-            <form method="post" action="cart.php">
-                <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                <input type="hidden" name="product_title" value="<?php echo htmlspecialchars($product['title']); ?>">
-                <input type="hidden" name="product_price" value="<?php echo $product['price']; ?>">
-                <button type="submit" name="add_to_cart" class="btn btn-success">Toevoegen aan winkelmandje</button>
-            </form>
-        <?php else: ?>
-            <p>Product niet gevonden.</p>
-        <?php endif; ?>
-    </div>
-
     <!-- Modals -->
 
     <!-- Change Password Modal -->
@@ -118,6 +125,31 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
+    </div>
+    
+    <div class="container mt-5">
+        <h1>Details van Bestelling #<?php echo $orderId; ?></h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Prijs</th>
+                    <th>Aantal</th>
+                    <th>Subtotaal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orderItems as $item): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($item['title']); ?></td>
+                        <td>€ <?php echo number_format($item['price'], 2); ?></td>
+                        <td><?php echo $item['quantity']; ?></td>
+                        <td>€ <?php echo number_format($item['subtotal'], 2); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <a href="orders_view.php" class="btn btn-secondary">Terug naar Bestellingen</a>
     </div>
 </body>
 </html>

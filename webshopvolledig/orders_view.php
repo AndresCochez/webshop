@@ -1,6 +1,27 @@
 <?php
 session_start();
-require_once 'db.php';
+include 'db.php'; // Zorg ervoor dat je db.php in dezelfde map hebt staan of pas het pad aan
+
+// Controleer of de gebruiker is ingelogd
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$userId = $_SESSION['user_id'];
+
+// Haal de bestellingen van de ingelogde gebruiker op
+$query = $pdo->prepare("
+    SELECT o.id AS order_id, o.created_at, SUM(oi.quantity * p.price) AS total_price
+    FROM orders o
+    JOIN order_items oi ON o.id = oi.order_id
+    JOIN products p ON oi.product_id = p.id
+    WHERE o.user_id = ?
+    GROUP BY o.id, o.created_at
+    ORDER BY o.created_at DESC
+");
+$query->execute([$userId]);
+$orders = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // Haal productinformatie op
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -23,7 +44,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['title'] ?? 'Productdetails'); ?></title>
+    <title>Mijn Bestellingen</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -70,25 +91,6 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </nav>
 
-    <!-- Productdetails -->
-    <div class="container mt-5">
-        <?php if ($product): ?>
-            <h1><?php echo htmlspecialchars($product['title']); ?></h1>
-            <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['title']); ?>" style="max-width: 100%; height: auto;">
-            <p><?php echo htmlspecialchars($product['description']); ?></p>
-            <p><strong>Prijs:</strong> € <?php echo number_format($product['price'], 2); ?></p>
-            <p><strong>Categorie:</strong> <?php echo htmlspecialchars($product['category_name']); ?></p>
-            <form method="post" action="cart.php">
-                <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                <input type="hidden" name="product_title" value="<?php echo htmlspecialchars($product['title']); ?>">
-                <input type="hidden" name="product_price" value="<?php echo $product['price']; ?>">
-                <button type="submit" name="add_to_cart" class="btn btn-success">Toevoegen aan winkelmandje</button>
-            </form>
-        <?php else: ?>
-            <p>Product niet gevonden.</p>
-        <?php endif; ?>
-    </div>
-
     <!-- Modals -->
 
     <!-- Change Password Modal -->
@@ -118,6 +120,39 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="container mt-5">
+        <h1>Mijn Bestellingen</h1>
+
+        <?php if (!empty($orders)): ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ordernummer</th>
+                        <th>Datum</th>
+                        <th>Totaalprijs</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($orders as $order): ?>
+                        <tr>
+                            <td><?php echo $order['order_id']; ?></td>
+                            <td><?php echo $order['created_at']; ?></td>
+                            <td>€ <?php echo number_format($order['total_price'], 2); ?></td>
+                            <td>
+                                <a href="order_details.php?order_id=<?php echo $order['order_id']; ?>" class="btn btn-primary">
+                                    Bekijk Details
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>U heeft nog geen bestellingen geplaatst.</p>
+        <?php endif; ?>
     </div>
 </body>
 </html>

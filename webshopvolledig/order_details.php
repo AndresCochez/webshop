@@ -13,7 +13,7 @@ $userId = $_SESSION['user_id'];
 
 // Haal de details van de bestelling op
 $query = $pdo->prepare("
-    SELECT p.title, p.price, oi.quantity, (oi.quantity * p.price) AS subtotal
+    SELECT p.id AS product_id, p.title, p.price, oi.quantity, (oi.quantity * p.price) AS subtotal
     FROM order_items oi
     JOIN products p ON oi.product_id = p.id
     WHERE oi.order_id = ? AND EXISTS (
@@ -26,6 +26,34 @@ $orderItems = $query->fetchAll(PDO::FETCH_ASSOC);
 if (!$orderItems) {
     echo "Bestelling niet gevonden of u heeft geen toegang.";
     exit();
+}
+
+// Beoordeling toevoegen
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
+    $rating = intval($_POST['rating']);
+    $review = trim($_POST['comment']);
+    $productId = intval($_POST['product_id']);
+    $userId = $_SESSION['user_id'];
+
+    // Controleer of de gebruiker dit product heeft gekocht
+    $stmt = $pdo->prepare("
+        SELECT 1 
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        WHERE oi.product_id = ? AND oi.order_id = ? AND o.user_id = ?
+    ");
+    $stmt->execute([$productId, $orderId, $userId]);
+
+    if ($stmt->fetch()) {
+        $stmt = $pdo->prepare("
+            INSERT INTO reviews (user_id, product_id, rating, comment)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([$userId, $productId, $rating, $review]);
+        $message = "Review succesvol toegevoegd!";
+    } else {
+        $message = "Je kunt alleen producten beoordelen die je hebt gekocht.";
+    }
 }
 
 // Haal productinformatie op
@@ -44,6 +72,7 @@ if (isset($_SESSION['user_id'])) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,39 +125,13 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </nav>
 
-    <!-- Modals -->
-
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="change_password.php">
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" name="current_password" id="currentPassword" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" name="new_password" id="newPassword" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                            <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Change Password</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <div class="container mt-5">
         <h1>Details van Bestelling #<?php echo $orderId; ?></h1>
+        
+        <?php if (isset($message)): ?>
+            <div class="alert alert-info"><?php echo $message; ?></div>
+        <?php endif; ?>
+
         <table class="table">
             <thead>
                 <tr>
@@ -149,7 +152,63 @@ if (isset($_SESSION['user_id'])) {
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <button 
+            class="btn btn-primary" 
+            data-bs-toggle="modal" 
+            data-bs-target="#reviewModal" 
+            data-product-id="<?php echo $item['product_id']; ?>" 
+            data-product-title="<?php echo htmlspecialchars($item['title']); ?>">
+            Beoordeling toevoegen
+        </button>
         <a href="orders_view.php" class="btn btn-secondary">Terug naar Bestellingen</a>
     </div>
+
+    <!-- Beoordeling Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Beoordeling toevoegen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="product_id" id="modalProductId">
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating (1-5)</label>
+                            <select name="rating" id="rating" class="form-select" required>
+                                <option value="">Selecteer een rating</option>
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Recensie</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="submit_review" class="btn btn-primary">Beoordeling indienen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const reviewModal = document.getElementById('reviewModal');
+        reviewModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const productId = button.getAttribute('data-product-id');
+            const productTitle = button.getAttribute('data-product-title');
+            
+            const modalTitle = reviewModal.querySelector('.modal-title');
+            const modalProductId = reviewModal.querySelector('#modalProductId');
+
+            modalTitle.textContent = `Beoordeling toevoegen voor ${productTitle}`;
+            modalProductId.value = productId;
+        });
+    </script>
 </body>
 </html>

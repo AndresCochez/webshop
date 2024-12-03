@@ -17,6 +17,20 @@ if (isset($_SESSION['user_id'])) {
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+// Haal reviews op voor dit product
+$reviews = [];
+if ($product) {
+    $stmt = $pdo->prepare("
+        SELECT r.rating, r.comment, r.created_at, u.username 
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.id 
+        WHERE r.product_id = ? 
+        ORDER BY r.created_at DESC
+    ");
+    $stmt->execute([$productId]);
+    $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,9 +57,6 @@ if (isset($_SESSION['user_id'])) {
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
                                 <a class="dropdown-item">Balance: €<?php echo number_format($user['balance'], 2); ?></a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
@@ -84,6 +95,22 @@ if (isset($_SESSION['user_id'])) {
                 <input type="hidden" name="product_price" value="<?php echo $product['price']; ?>">
                 <button type="submit" name="add_to_cart" class="btn btn-success">Toevoegen aan winkelmandje</button>
             </form>
+
+            <hr>
+            
+            <h2>Reviews</h2>
+            <?php if ($reviews): ?>
+                <?php foreach ($reviews as $review): ?>
+                    <div class="mb-3">
+                        <strong><?php echo htmlspecialchars($review['username']); ?></strong> 
+                        <span>(<?php echo $review['rating']; ?>/5)</span>
+                        <p><?php echo htmlspecialchars($review['comment']); ?></p>
+                        <small class="text-muted">Op <?php echo date('d-m-Y', strtotime($review['created_at'])); ?></small>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>Er zijn nog geen reviews voor dit product.</p>
+            <?php endif; ?>
         <?php else: ?>
             <p>Product niet gevonden.</p>
         <?php endif; ?>

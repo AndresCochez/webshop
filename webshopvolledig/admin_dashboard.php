@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     }
 }
 ?>
+<div id="detailss" >
+<h1>Admin Dashboard</h1>
 
 <!-- Knop voor het openen van de modal -->
 <div class="text-end mb-3">
@@ -100,6 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="background.css">
 
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
@@ -171,7 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
 ?>
 
 <!-- Productenlijst met bewerken -->
-<h2>Product Overview</h2>
 <div class="row">
     <?php
     $stmt = $pdo->query("SELECT p.id, p.title, p.description, p.price, p.image, c.name AS category_name 
@@ -269,4 +273,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
         </div>";
     }
     ?>
+</div>
 </div>

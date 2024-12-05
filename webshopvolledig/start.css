@@ -1,0 +1,172 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1.6;
+    background-color: #212529;
+}
+
+.container {
+    width: 100%;
+    overflow: hidden;
+}
+
+header {
+    color: #212529;
+    padding: 1rem 0;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+section {
+    padding: 5rem 0;
+    margin-top: 120px;
+}
+
+#home {
+    color: #212529;
+    text-align: center;
+    height: 50vh;
+    margin-top: 20vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+#home h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+#home p {
+    font-size: 1.2rem;
+}
+
+#portfolio {
+    padding: 2rem 0;
+}
+
+#about {
+    background-color: white;
+    padding: 2rem 0;
+}
+
+#about p {
+    text-align: justify;
+    margin: 0 auto;
+    max-width: 650px;
+    color: #212529;
+}
+
+h1, h2, h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #212529;
+}
+
+.portfolio-item {
+    background-color: #212529;
+    padding: 2rem;
+    margin: 0.4rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    width: calc(28% - 2rem);
+    transition: transform 0.3s;
+}
+
+#products {
+    color: #ffffff;
+}
+
+.portfolio-item a {
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    display: block;
+    text-align: center;
+}
+
+.portfolio-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.portfolio-item:hover {
+    transform: translateY(-10px);
+}
+
+.portfolio-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Projecten onder elkaar bij kleinere schermen */
+@media (max-width: 768px) {
+    .portfolio-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .portfolio-item {
+        width: 80%; /* Breedte van het project ingesteld op 80% */
+        margin: 1rem 0;
+        padding: 1.5rem; /* Verminderde padding */
+    }
+
+    .container {
+        width: 90%; /* Breder maken voor mobiel */
+    }
+}
+
+@media (max-width: 480px) {
+    .portfolio-item {
+        padding: 1rem; /* Nog minder padding voor zeer kleine schermen */
+    }
+
+    .portfolio-item img {
+        width: 100%; /* Afbeelding volledige breedte laten nemen */
+        height: auto;
+    }
+}
+
+footer {
+    color: #ffffff;
+    text-align: center;
+    padding: 2rem 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+footer p {
+    margin: 0;
+}
+
+
+
+
+#portfolio {
+    text-align: center; /* Centers content horizontally */
+}
+
+.portfolio-grid {
+    display: flex;
+    justify-content: center; /* Centers items in the grid */
+    flex-wrap: wrap;
+    gap: 20px; /* Adds spacing between items */
+    margin-bottom: 20px; /* Adds spacing below the grid */
+}
+
+.portfolio-item {
+    text-align: center; /* Centers text under each image */
+}

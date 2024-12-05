@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    color: #344039;
+    margin: 0;
+    padding: 0;
+}
+
+
+.container {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.navbar a, .navbar .dropdown-menu a, .btn {
+    font-size: 16px; /* Pas dit aan naar de gewenste grootte */
+    font-family: 'Arial', sans-serif; /* Consistent lettertype */
+}
+
+h1 {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    padding: 15px; /* Adds padding around the text */
+    border-radius: 8px; /* Rounds the corners */
+    font-size: 2.5em; /* Adjusts the font size */
+    margin: 20px auto; /* Adds space around and centers the element */
+}
+
+#detailss, .userscherm, .table, .h2 {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    padding: 15px; /* Adds padding around the text */
+    border-radius: 8px; /* Rounds the corners */
+    margin: 20px auto; /* Adds space around and centers the element */
+}

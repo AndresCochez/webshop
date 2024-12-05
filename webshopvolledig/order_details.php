@@ -74,13 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     <title>Details van Bestelling #<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="background.css">
 </head>
 <body>
     <!-- Gebruik UserHeader -->
     <?php $userHeader->render(); ?>
 
-    <div class="container mt-5">
+    <div id="detailss" class="container mt-5">
         <h1>Details van Bestelling #<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?></h1>
         
         <?php if (isset($message)): ?>

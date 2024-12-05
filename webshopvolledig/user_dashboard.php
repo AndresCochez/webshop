@@ -24,6 +24,8 @@ $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<div class="userscherm">
+<h1>Products</h1>
 <!-- Zoek- en sorteerbalk -->
 <div class="row mb-4">
     <div class="col-md-6">
@@ -52,6 +54,8 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<link rel="stylesheet" href="background.css">
+
 <!-- Product overview -->
 <div class="row">
     <?php
@@ -78,4 +82,5 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo "<div class='col-12'><p class='text-center'>No products found.</p></div>";
     }
     ?>
+</div>
 </div>

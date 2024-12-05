@@ -8,10 +8,10 @@ include 'db.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webshop</title>
+    <title>Starcoffee</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,9 +30,9 @@ include 'db.php';
 
             if ($user['username'] === 'admin' || $user['is_admin'] == 1): ?>
                 <!-- Admin Navigatie -->
-                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-bottom: -50px;">
                     <div class="container">
-                        <a class="navbar-brand" href="#">Webshop</a>
+                        <a class="navbar-brand" href="#">Starcoffee</a>
                         <div class="ms-auto">
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <?php
@@ -65,9 +65,9 @@ include 'db.php';
                 </nav>
             <?php else: ?>
                 <!-- User Navigatie -->
-                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-bottom: -50px;">
                     <div class="container">
-                        <a class="navbar-brand" href="index.php">Webshop</a>
+                        <a class="navbar-brand" href="index.php">Starcoffee</a>
                         <div class="ms-auto d-flex align-items-center">
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <?php
@@ -105,7 +105,7 @@ include 'db.php';
 
                             <!-- Winkelmandje -->
                             <a href="cart_view.php" class="btn btn-warning">
-                                Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
+                                Cart (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
                             </a>
                         </div>
                     </div>
@@ -113,9 +113,9 @@ include 'db.php';
             <?php endif; ?>
         <?php else: ?>
             <!-- Standaard inhoud voor niet-ingelogde gebruikers -->
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-bottom: -50px;">
                     <div class="container">
-                        <a class="navbar-brand" href="#">Webshop</a>
+                        <a class="navbar-brand" href="#">Starcoffee</a>
                         <div class="ms-auto">
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <?php
@@ -160,17 +160,68 @@ include 'db.php';
 
             if ($user['username'] === 'admin' || $user['is_admin'] == 1): ?>
                 <!-- Admin Dashboard -->
-                <h1>Admin Dashboard</h1>
                 <?php include 'admin_dashboard.php'; ?>
             <?php else: ?>
                 <!-- User Dashboard -->
-                <h1>User Dashboard</h1>
                 <?php include 'user_dashboard.php'; ?>
             <?php endif; ?>
         <?php else: ?>
             <!-- Standaard inhoud voor niet-ingelogde gebruikers -->
-            <h1>Welcome to the Webshop</h1>
-            <p>Browse and shop your favorite items!</p>
+            <section id="home">
+                <div class="content">
+                    <img src="images/banner.png" alt="">
+                    <br>
+                </div>
+            </section>
+
+            <section id="portfolio">
+                <div class="container">
+                    <div class="portfolio-grid">
+                        <div class="portfolio-item">
+                            <a>
+                                <img src="images/cold.png" alt="Project 1">
+                                <p id="products">Cold Drinks</p>
+                            </a>
+                        </div>
+                        <div class="portfolio-item">
+                            <a>
+                                <img src="images/hot.png" alt="Project 2">
+                                <p id="products" >Hot Drinks</p>
+                            </a>
+                        </div>
+                        <div class="portfolio-item">
+                            <a>
+                                <img src="images/food.png" alt="Project 3">
+                                <p id="products">Food</p>
+                            </a>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#loginModal">Discover our products</button>
+                </div>
+                <br>
+                <br>
+            </section>
+
+            <section id="about">
+                <br>
+                <br>
+                <div class="container">
+                    <h1>Welcome to Starcoffee</h1>
+                    <br>
+                    <p>Every cup of coffee begins with a story. Journey back to <span class="highlight">Ethiopia</span>, the birthplace of coffee, where legend has it a goat herder named <span class="highlight">Kaldi</span> discovered the magical red cherries. This remarkable discovery spread quickly, making coffee a symbol of warmth, connection, and inspiration across cultures.</p>
+                    <br>
+                    <p>We source the finest beans from around the globe: the sun-kissed fields of <span class="highlight">Colombia</span>, the lush highlands of <span class="highlight">Guatemala</span>, and the fertile volcanic soils of <span class="highlight">Indonesia</span>. Each bean is handpicked, carefully processed, and roasted with passion to preserve its unique flavors and aromas.</p>
+                </div>
+                <br>
+                <br>
+            </section>
+
+            <footer>
+                <div class="container">
+                    <p>&copy; 2024 Andres Cochez</p>
+                    <link rel="stylesheet" href="start.css">
+                </div>
+            </footer>
         <?php endif; ?>
     </div>
 

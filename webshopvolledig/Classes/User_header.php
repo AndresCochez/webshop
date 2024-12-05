@@ -13,9 +13,9 @@ class UserHeader
     public function render()
     {
         ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="margin-bottom: -50px;">
             <div class="container">
-                <a class="navbar-brand" href="index.php">Webshop</a>
+                <a class="navbar-brand" href="index.php">Starcoffee</a>
                 <div class="ms-auto d-flex align-items-center">
                     <?php if ($this->user): ?>
                         <div class="dropdown me-3">
@@ -44,7 +44,7 @@ class UserHeader
                     <?php endif; ?>
 
                     <a href="cart_view.php" class="btn btn-warning">
-                        Winkelmandje (<?php echo $this->cartItemsCount; ?>)
+                        Cart (<?php echo $this->cartItemsCount; ?>)
                     </a>
                 </div>
             </div>

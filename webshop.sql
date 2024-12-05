@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 26 nov 2024 om 21:50
+-- Gegenereerd op: 05 dec 2024 om 16:55
 -- Serverversie: 10.4.32-MariaDB
 -- PHP-versie: 8.2.12
 
@@ -88,8 +88,22 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `title`, `description`, `price`, `image`, `category_id`, `created_at`) VALUES
-(14, 'Test', 'Test', 5.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 1, '2024-11-26 20:48:23'),
-(15, 'Test 2', 'Test 2', 10.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 2, '2024-11-26 20:49:10');
+(14, 'Test', 'Test', 5.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 4, '2024-11-26 20:48:23');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structuur voor view `product_details`
+-- (Zie onder voor de actuele view)
+--
+CREATE TABLE `product_details` (
+`id` int(11)
+,`title` varchar(100)
+,`description` text
+,`price` decimal(10,2)
+,`image` varchar(255)
+,`category_name` varchar(100)
+);
 
 -- --------------------------------------------------------
 
@@ -127,8 +141,17 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `balance`, `is_admin`, `created_at`) VALUES
-(1, 'admin', 'admin@admin.com', '$2y$10$t7T1M6pRg1uiyRELIfpVYOmE0n/ekV3w/p65sppDT6mJ1SRfOgG.e', 1000.00, 0, '2024-11-25 16:36:38'),
+(1, 'admin', 'admin@admin.com', '$2y$10$Aqjx9cUiPOrE/plYXr.tVe35skZpdg8ut7IgKQEP3OXgdlx1ECl0S', 1000.00, 0, '2024-11-25 16:36:38'),
 (2, 'user', 'user@user.com', '$2y$10$0eLoRYPVMoj6EN667crOQedrmZEjDfuB6iZsfdbx5Gcn8puuMLo2y', 1000.00, 0, '2024-11-25 21:52:11');
+
+-- --------------------------------------------------------
+
+--
+-- Structuur voor de view `product_details`
+--
+DROP TABLE IF EXISTS `product_details`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `product_details`  AS SELECT `p`.`id` AS `id`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`price` AS `price`, `p`.`image` AS `image`, `c`.`name` AS `category_name` FROM (`products` `p` left join `categories` `c` on(`p`.`category_id` = `c`.`id`)) ;
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -192,31 +215,31 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT voor een tabel `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT voor een tabel `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT voor een tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT voor een tabel `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Beperkingen voor geëxporteerde tabellen

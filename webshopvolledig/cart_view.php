@@ -1,6 +1,21 @@
 <?php
 session_start();
-include 'db.php'; // Zorg ervoor dat je db.php in dezelfde map hebt staan of pas het pad aan
+include 'db.php';
+include 'Classes/User_header.php'; // Importeer de UserHeader-klasse
+
+// Haal gebruikersinformatie op als de gebruiker is ingelogd
+$user = null;
+if (isset($_SESSION['user_id'])) {
+    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
+    $stmt->execute([intval($_SESSION['user_id'])]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Bereken het aantal items in het winkelmandje
+$cartItemsCount = isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0;
+
+// Initialiseer de UserHeader
+$userHeader = new UserHeader($user, $cartItemsCount);
 
 // Verwijder een product uit het winkelmandje
 if (isset($_POST['remove_item'])) {
@@ -64,23 +79,8 @@ if (isset($_POST['place_order'])) {
         $errorMessage = "Gebruiker niet gevonden.";
     }
 }
-
-// Haal productinformatie op
-$productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($productId > 0) {
-    $stmt = $pdo->prepare("SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
-    $stmt->execute([$productId]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-// Haal gebruikersinformatie op als de gebruiker is ingelogd
-$user = null;
-if (isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
-    $stmt->execute([intval($_SESSION['user_id'])]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,46 +92,8 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Navigatie -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">Webshop</a>
-            <div class="ms-auto d-flex align-items-center">
-                <?php if ($user): ?>
-                    <!-- Dropdown-menu voor ingelogde gebruikers -->
-                    <div class="dropdown me-3">
-                        <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Welcome, <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li>
-                                <a class="dropdown-item">Balance: €<?php echo number_format(floatval($user['balance']), 2); ?></a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="logout.php">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                <?php else: ?>
-                    <!-- Login/Register knoppen voor niet-ingelogde gebruikers -->
-                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-                    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
-                <?php endif; ?>
-
-                <!-- Winkelmandje -->
-                <a href="cart_view.php" class="btn btn-warning">
-                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0; ?>)
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Gebruik UserHeader -->
+    <?php $userHeader->render(); ?>
 
     <!-- Winkelmandje -->
     <div class="container mt-5">

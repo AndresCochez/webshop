@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db.php';
+include 'Classes/User_header.php'; // Importeer de UserHeader-klasse
 
 // Controleer of de gebruiker is ingelogd
 if (!isset($_SESSION['user_id'])) {
@@ -27,6 +28,15 @@ if (!$orderItems) {
     echo "Bestelling niet gevonden of u heeft geen toegang.";
     exit();
 }
+
+// Haal gebruikersinformatie op
+$stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
+$stmt->execute([$userId]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Initialiseer de UserHeader
+$cartItemsCount = isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0;
+$userHeader = new UserHeader($user, $cartItemsCount);
 
 // Beoordeling toevoegen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
@@ -67,43 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Navigatie -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">Webshop</a>
-            <div class="ms-auto d-flex align-items-center">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <!-- Dropdown-menu voor ingelogde gebruikers -->
-                    <?php
-                    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
-                    $stmt->execute([intval($_SESSION['user_id'])]);
-                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                    ?>
-                    <div class="dropdown me-3">
-                        <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Welcome, <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li>
-                                <a class="dropdown-item">Balance: €<?php echo number_format(floatval($user['balance']), 2); ?></a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="orders_view.php">Mijn Bestellingen</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="logout.php">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Winkelmandje -->
-                <a href="cart_view.php" class="btn btn-warning">
-                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0; ?>)
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Gebruik UserHeader -->
+    <?php $userHeader->render(); ?>
 
     <div class="container mt-5">
         <h1>Details van Bestelling #<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?></h1>

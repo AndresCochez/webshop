@@ -1,7 +1,7 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
+    $title = htmlspecialchars(trim($_POST['title']), ENT_QUOTES, 'UTF-8');
+    $description = htmlspecialchars(trim($_POST['description']), ENT_QUOTES, 'UTF-8');
     $price = $_POST['price'];
     $category_id = $_POST['category_id'];
     $image = $_FILES['image'];
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
-        $imagePath = $uploadDir . '/' . basename($image['name']);
+        $imagePath = $uploadDir . '/' . htmlspecialchars(basename($image['name']), ENT_QUOTES, 'UTF-8');
         if (!move_uploaded_file($image['tmp_name'], $imagePath)) {
             $errors[] = "Failed to upload the image.";
         }
@@ -31,17 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
 
     if (empty($errors)) {
         try {
-            // Voeg product toe aan database
             $stmt = $pdo->prepare("INSERT INTO products (title, description, price, category_id, image) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$title, $description, $price, $category_id, $imagePath]);
 
             echo "<div class='alert alert-success'>Product added successfully!</div>";
         } catch (PDOException $e) {
-            echo "<div class='alert alert-danger'>Error adding product: " . $e->getMessage() . "</div>";
+            echo "<div class='alert alert-danger'>Error adding product: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</div>";
         }
     } else {
         foreach ($errors as $error) {
-            echo "<div class='alert alert-danger'>$error</div>";
+            echo "<div class='alert alert-danger'>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</div>";
         }
     }
 }
@@ -83,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
                             <?php
                             $categories = $pdo->query("SELECT id, name FROM categories");
                             while ($category = $categories->fetch()) {
-                                echo "<option value='{$category['id']}'>{$category['name']}</option>";
+                                echo "<option value='" . htmlspecialchars($category['id'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') . "</option>";
                             }
                             ?>
                         </select>
@@ -104,23 +103,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
 
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
-    $product_id = $_POST['delete_product_id'];
+    $product_id = htmlspecialchars($_POST['delete_product_id'], ENT_QUOTES, 'UTF-8');
     try {
-        // Verwijder het product
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$product_id]);
 
         echo "<div class='alert alert-success'>Product deleted successfully!</div>";
     } catch (PDOException $e) {
-        echo "<div class='alert alert-danger'>Error deleting product: " . $e->getMessage() . "</div>";
+        echo "<div class='alert alert-danger'>Error deleting product: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</div>";
     }
 }
 
 // Bewerken van product
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
-    $product_id = $_POST['product_id'];
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
+    $product_id = htmlspecialchars($_POST['product_id'], ENT_QUOTES, 'UTF-8');
+    $title = htmlspecialchars(trim($_POST['title']), ENT_QUOTES, 'UTF-8');
+    $description = htmlspecialchars(trim($_POST['description']), ENT_QUOTES, 'UTF-8');
     $price = $_POST['price'];
     $category_id = $_POST['category_id'];
     $image = $_FILES['image'];
@@ -142,13 +140,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
-        $imagePath = $uploadDir . '/' . basename($image['name']);
+        $imagePath = $uploadDir . '/' . htmlspecialchars(basename($image['name']), ENT_QUOTES, 'UTF-8');
         move_uploaded_file($image['tmp_name'], $imagePath);
     }
 
     if (empty($errors)) {
         try {
-            // Werk productgegevens bij
             $query = "UPDATE products SET title = ?, description = ?, price = ?, category_id = ?";
             $params = [$title, $description, $price, $category_id];
             if ($imagePath) {
@@ -163,11 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
 
             echo "<div class='alert alert-success'>Product updated successfully!</div>";
         } catch (PDOException $e) {
-            echo "<div class='alert alert-danger'>Error updating product: " . $e->getMessage() . "</div>";
+            echo "<div class='alert alert-danger'>Error updating product: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</div>";
         }
     } else {
         foreach ($errors as $error) {
-            echo "<div class='alert alert-danger'>$error</div>";
+            echo "<div class='alert alert-danger'>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</div>";
         }
     }
 }
@@ -184,16 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
         echo "
         <div class='col-md-4 mb-3'>
             <div class='card'>
-                <img src='{$product['image']}' class='card-img-top' alt='{$product['title']}' style='height: 200px; object-fit: cover;'>
+                <img src='" . htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') . "' class='card-img-top' alt='" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "' style='height: 200px; object-fit: cover;'>
                 <div class='card-body'>
-                    <h5 class='card-title'>{$product['title']}</h5>
-                    <p class='card-text'>{$product['description']}</p>
-                    <p class='card-text'><strong>Price:</strong> € {$product['price']}</p>
-                    <p class='card-text'><small class='text-muted'>Category: {$product['category_name']}</small></p>
-                    <button type='button' class='btn btn-secondary' data-bs-toggle='modal' data-bs-target='#editProductModal{$product['id']}'>
+                    <h5 class='card-title'>" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "</h5>
+                    <p class='card-text'>" . htmlspecialchars($product['description'], ENT_QUOTES, 'UTF-8') . "</p>
+                    <p class='card-text'><strong>Price:</strong> € " . htmlspecialchars($product['price'], ENT_QUOTES, 'UTF-8') . "</p>
+                    <p class='card-text'><small class='text-muted'>Category: " . htmlspecialchars($product['category_name'], ENT_QUOTES, 'UTF-8') . "</small></p>
+                    <button type='button' class='btn btn-secondary' data-bs-toggle='modal' data-bs-target='#editProductModal" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>
                         Edit
                     </button>
-                    <button type='button' class='btn btn-danger' data-bs-toggle='modal' data-bs-target='#deleteProductModal{$product['id']}'>
+                    <button type='button' class='btn btn-danger' data-bs-toggle='modal' data-bs-target='#deleteProductModal" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>
                         Delete
                     </button>
                 </div>
@@ -201,43 +198,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
         </div>
 
         <!-- Edit Product Modal -->
-        <div class='modal fade' id='editProductModal{$product['id']}' tabindex='-1' aria-labelledby='editProductModalLabel{$product['id']}' aria-hidden='true'>
+        <div class='modal fade' id='editProductModal" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' tabindex='-1' aria-labelledby='editProductModalLabel" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' aria-hidden='true'>
             <div class='modal-dialog'>
                 <div class='modal-content'>
                     <div class='modal-header'>
-                        <h5 class='modal-title' id='editProductModalLabel{$product['id']}'>Edit Product</h5>
+                        <h5 class='modal-title' id='editProductModalLabel" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>Edit Product</h5>
                         <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                     </div>
                     <form method='post' enctype='multipart/form-data'>
-                        <input type='hidden' name='product_id' value='{$product['id']}'>
+                        <input type='hidden' name='product_id' value='" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>
                         <div class='modal-body'>
                             <div class='mb-3'>
-                                <label for='title{$product['id']}' class='form-label'>Title</label>
-                                <input type='text' name='title' id='title{$product['id']}' class='form-control' value='{$product['title']}' required>
+                                <label for='title" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-label'>Title</label>
+                                <input type='text' name='title' id='title" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-control' value='" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "' required>
                             </div>
                             <div class='mb-3'>
-                                <label for='description{$product['id']}' class='form-label'>Description</label>
-                                <textarea name='description' id='description{$product['id']}' class='form-control' rows='4'>{$product['description']}</textarea>
+                                <label for='description" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-label'>Description</label>
+                                <textarea name='description' id='description" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-control' rows='4'>" . htmlspecialchars($product['description'], ENT_QUOTES, 'UTF-8') . "</textarea>
                             </div>
                             <div class='mb-3'>
-                                <label for='price{$product['id']}' class='form-label'>Price</label>
-                                <input type='number' name='price' id='price{$product['id']}' class='form-control' step='0.01' min='0' value='{$product['price']}' required>
+                                <label for='price" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-label'>Price</label>
+                                <input type='number' name='price' id='price" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-control' step='0.01' min='0' value='" . htmlspecialchars($product['price'], ENT_QUOTES, 'UTF-8') . "' required>
                             </div>
                             <div class='mb-3'>
-                                <label for='category_id{$product['id']}' class='form-label'>Category</label>
-                                <select name='category_id' id='category_id{$product['id']}' class='form-control' required>
+                                <label for='category_id" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-label'>Category</label>
+                                <select name='category_id' id='category_id" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-control' required>
                                     <option value='' disabled>Select a category</option>";
         $categories = $pdo->query("SELECT id, name FROM categories");
         while ($category = $categories->fetch()) {
             $selected = $category['id'] == $product['category_id'] ? "selected" : "";
-            echo "<option value='{$category['id']}' $selected>{$category['name']}</option>";
+            echo "<option value='" . htmlspecialchars($category['id'], ENT_QUOTES, 'UTF-8') . "' " . htmlspecialchars($selected, ENT_QUOTES, 'UTF-8') . ">" . htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') . "</option>";
         }
         echo "
                                 </select>
                             </div>
                             <div class='mb-3'>
-                                <label for='image{$product['id']}' class='form-label'>Image</label>
-                                <input type='file' name='image' id='image{$product['id']}' class='form-control' accept='image/*'>
+                                <label for='image" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-label'>Image</label>
+                                <input type='file' name='image' id='image" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' class='form-control' accept='image/*'>
                                 <small class='text-muted'>Leave empty to keep the current image.</small>
                             </div>
                         </div>
@@ -250,20 +247,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
             </div>
         </div>
         <!-- Delete Product Modal -->
-        <div class='modal fade' id='deleteProductModal{$product['id']}' tabindex='-1' aria-labelledby='deleteProductModalLabel{$product['id']}' aria-hidden='true'>
+        <div class='modal fade' id='deleteProductModal" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' tabindex='-1' aria-labelledby='deleteProductModalLabel" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "' aria-hidden='true'>
             <div class='modal-dialog'>
                 <div class='modal-content'>
                     <div class='modal-header'>
-                        <h5 class='modal-title' id='deleteProductModalLabel{$product['id']}'>Delete Product</h5>
+                        <h5 class='modal-title' id='deleteProductModalLabel" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>Delete Product</h5>
                         <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                     </div>
                     <div class='modal-body'>
-                        Are you sure you want to delete the product <strong>{$product['title']}</strong>?
+                        Are you sure you want to delete the product <strong>" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "</strong>?
                     </div>
                     <div class='modal-footer'>
                         <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cancel</button>
                         <form method='post'>
-                            <input type='hidden' name='delete_product_id' value='{$product['id']}'>
+                            <input type='hidden' name='delete_product_id' value='" . htmlspecialchars($product['id'], ENT_QUOTES, 'UTF-8') . "'>
                             <button type='submit' name='delete_product' class='btn btn-danger'>Delete</button>
                         </form>
                     </div>

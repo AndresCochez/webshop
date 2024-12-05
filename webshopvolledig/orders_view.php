@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Zorg ervoor dat je db.php in dezelfde map hebt staan of pas het pad aan
+include 'db.php'; // Zorg ervoor dat db.php correct is ingesteld
 
 // Controleer of de gebruiker is ingelogd
 if (!isset($_SESSION['user_id'])) {
@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$userId = $_SESSION['user_id'];
+$userId = intval($_SESSION['user_id']); // Zorg ervoor dat de user_id veilig wordt verwerkt
 
 // Haal de bestellingen van de ingelogde gebruiker op
 $query = $pdo->prepare("
@@ -23,19 +23,11 @@ $query = $pdo->prepare("
 $query->execute([$userId]);
 $orders = $query->fetchAll(PDO::FETCH_ASSOC);
 
-// Haal productinformatie op
-$productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($productId > 0) {
-    $stmt = $pdo->prepare("SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
-    $stmt->execute([$productId]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
 // Haal gebruikersinformatie op als de gebruiker is ingelogd
 $user = null;
 if (isset($_SESSION['user_id'])) {
     $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
@@ -59,14 +51,14 @@ if (isset($_SESSION['user_id'])) {
                     <!-- Dropdown-menu voor ingelogde gebruikers -->
                     <div class="dropdown me-3">
                         <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Welcome, <?php echo htmlspecialchars($user['username']); ?>
+                            Welcome, <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item">Balance: €<?php echo number_format($user['balance'], 2); ?></a>
+                                <a class="dropdown-item">Balance: €<?php echo number_format(floatval($user['balance']), 2); ?></a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
+                                <a class="dropdown-item" href="orders_view.php">Mijn Bestellingen</a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
@@ -85,7 +77,7 @@ if (isset($_SESSION['user_id'])) {
 
                 <!-- Winkelmandje -->
                 <a href="cart_view.php" class="btn btn-warning">
-                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
+                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0; ?>)
                 </a>
             </div>
         </div>
@@ -138,11 +130,11 @@ if (isset($_SESSION['user_id'])) {
                 <tbody>
                     <?php foreach ($orders as $order): ?>
                         <tr>
-                            <td><?php echo $order['order_id']; ?></td>
-                            <td><?php echo $order['created_at']; ?></td>
-                            <td>€ <?php echo number_format($order['total_price'], 2); ?></td>
+                            <td><?php echo htmlspecialchars($order['order_id'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars($order['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td>€ <?php echo number_format(floatval($order['total_price']), 2); ?></td>
                             <td>
-                                <a href="order_details.php?order_id=<?php echo $order['order_id']; ?>" class="btn btn-primary">
+                                <a href="order_details.php?order_id=<?php echo intval($order['order_id']); ?>" class="btn btn-primary">
                                     Bekijk Details
                                 </a>
                             </td>

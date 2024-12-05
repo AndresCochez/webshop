@@ -2,8 +2,9 @@
 session_start();
 
 if (isset($_POST['add_to_cart'])) {
+    // Zorg ervoor dat invoer veilig wordt verwerkt
     $productId = intval($_POST['product_id']);
-    $productTitle = $_POST['product_title'];
+    $productTitle = htmlspecialchars($_POST['product_title'], ENT_QUOTES, 'UTF-8');
     $productPrice = floatval($_POST['product_price']);
 
     // Controleer of het product al in het winkelmandje zit
@@ -27,7 +28,7 @@ if (isset($_POST['add_to_cart'])) {
     }
 }
 
-// Stuur gebruiker terug naar de productdetailpagina
-header("Location: product_details.php?id=" . $productId);
+// Stuur gebruiker veilig terug naar de productdetailpagina
+header("Location: product_details.php?id=" . urlencode($productId));
 exit();
 ?>

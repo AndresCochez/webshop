@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $orderId = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
-$userId = $_SESSION['user_id'];
+$userId = intval($_SESSION['user_id']);
 
 // Haal de details van de bestelling op
 $query = $pdo->prepare("
@@ -31,9 +31,8 @@ if (!$orderItems) {
 // Beoordeling toevoegen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     $rating = intval($_POST['rating']);
-    $review = trim($_POST['comment']);
+    $review = htmlspecialchars(trim($_POST['comment']), ENT_QUOTES, 'UTF-8');
     $productId = intval($_POST['product_id']);
-    $userId = $_SESSION['user_id'];
 
     // Controleer of de gebruiker dit product heeft gekocht
     $stmt = $pdo->prepare("
@@ -55,22 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
         $message = "Je kunt alleen producten beoordelen die je hebt gekocht.";
     }
 }
-
-// Haal productinformatie op
-$productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($productId > 0) {
-    $stmt = $pdo->prepare("SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
-    $stmt->execute([$productId]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-// Haal gebruikersinformatie op als de gebruiker is ingelogd
-$user = null;
-if (isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-}
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +61,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Details van Bestelling #<?php echo $orderId; ?></title>
+    <title>Details van Bestelling #<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -89,47 +72,44 @@ if (isset($_SESSION['user_id'])) {
         <div class="container">
             <a class="navbar-brand" href="index.php">Webshop</a>
             <div class="ms-auto d-flex align-items-center">
-                <?php if ($user): ?>
+                <?php if (isset($_SESSION['user_id'])): ?>
                     <!-- Dropdown-menu voor ingelogde gebruikers -->
+                    <?php
+                    $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
+                    $stmt->execute([intval($_SESSION['user_id'])]);
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                    ?>
                     <div class="dropdown me-3">
                         <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Welcome, <?php echo htmlspecialchars($user['username']); ?>
+                            Welcome, <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item">Balance: €<?php echo number_format($user['balance'], 2); ?></a>
+                                <a class="dropdown-item">Balance: €<?php echo number_format(floatval($user['balance']), 2); ?></a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
+                                <a class="dropdown-item" href="orders_view.php">Mijn Bestellingen</a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="logout.php">Logout</a>
                             </li>
                         </ul>
                     </div>
-                <?php else: ?>
-                    <!-- Login/Register knoppen voor niet-ingelogde gebruikers -->
-                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-                    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
                 <?php endif; ?>
 
                 <!-- Winkelmandje -->
                 <a href="cart_view.php" class="btn btn-warning">
-                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
+                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0; ?>)
                 </a>
             </div>
         </div>
     </nav>
 
     <div class="container mt-5">
-        <h1>Details van Bestelling #<?php echo $orderId; ?></h1>
+        <h1>Details van Bestelling #<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?></h1>
         
         <?php if (isset($message)): ?>
-            <div class="alert alert-info"><?php echo $message; ?></div>
+            <div class="alert alert-info"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div>
         <?php endif; ?>
 
         <table class="table">
@@ -144,10 +124,10 @@ if (isset($_SESSION['user_id'])) {
             <tbody>
                 <?php foreach ($orderItems as $item): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($item['title']); ?></td>
-                        <td>€ <?php echo number_format($item['price'], 2); ?></td>
-                        <td><?php echo $item['quantity']; ?></td>
-                        <td>€ <?php echo number_format($item['subtotal'], 2); ?></td>
+                        <td><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td>€ <?php echo number_format(floatval($item['price']), 2); ?></td>
+                        <td><?php echo intval($item['quantity']); ?></td>
+                        <td>€ <?php echo number_format(floatval($item['subtotal']), 2); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -156,8 +136,8 @@ if (isset($_SESSION['user_id'])) {
             class="btn btn-primary" 
             data-bs-toggle="modal" 
             data-bs-target="#reviewModal" 
-            data-product-id="<?php echo $item['product_id']; ?>" 
-            data-product-title="<?php echo htmlspecialchars($item['title']); ?>">
+            data-product-id="<?php echo intval($item['product_id']); ?>" 
+            data-product-title="<?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>">
             Beoordeling toevoegen
         </button>
         <a href="orders_view.php" class="btn btn-secondary">Terug naar Bestellingen</a>

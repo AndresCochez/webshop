@@ -20,12 +20,12 @@ $errorMessage = "";
 
 // Plaats bestelling
 if (isset($_POST['place_order'])) {
-    $userId = $_SESSION['user_id']; // Zorg dat je de gebruiker-id opslaat in de sessie
+    $userId = intval($_SESSION['user_id']); // Zorg dat je de gebruiker-id opslaat in de sessie
     $total = 0;
 
     // Bereken het totaalbedrag van de bestelling
     foreach ($_SESSION['cart'] as $item) {
-        $total += $item['price'] * $item['quantity'];
+        $total += floatval($item['price']) * intval($item['quantity']);
     }
 
     // Haal het huidige saldo van de gebruiker op
@@ -34,7 +34,7 @@ if (isset($_POST['place_order'])) {
     $user = $query->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
-        $currentBalance = $user['balance'];
+        $currentBalance = floatval($user['balance']);
 
         // Controleer of de gebruiker voldoende saldo heeft
         if ($currentBalance >= $total) {
@@ -51,7 +51,7 @@ if (isset($_POST['place_order'])) {
             // Voeg de items toe aan de order_items-tabel
             foreach ($_SESSION['cart'] as $item) {
                 $orderItemQuery = $pdo->prepare("INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)");
-                $orderItemQuery->execute([$orderId, $item['id'], $item['quantity']]);
+                $orderItemQuery->execute([$orderId, intval($item['id']), intval($item['quantity'])]);
             }
 
             // Leeg het winkelmandje
@@ -77,7 +77,7 @@ if ($productId > 0) {
 $user = null;
 if (isset($_SESSION['user_id'])) {
     $stmt = $pdo->prepare("SELECT username, balance FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([intval($_SESSION['user_id'])]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
@@ -101,11 +101,11 @@ if (isset($_SESSION['user_id'])) {
                     <!-- Dropdown-menu voor ingelogde gebruikers -->
                     <div class="dropdown me-3">
                         <a href="#" class="text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Welcome, <?php echo htmlspecialchars($user['username']); ?>
+                            Welcome, <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item">Balance: €<?php echo number_format($user['balance'], 2); ?></a>
+                                <a class="dropdown-item">Balance: €<?php echo number_format(floatval($user['balance']), 2); ?></a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="orders_view.php" class="btn btn-outline-light me-3">Mijn Bestellingen</a>
@@ -127,42 +127,11 @@ if (isset($_SESSION['user_id'])) {
 
                 <!-- Winkelmandje -->
                 <a href="cart_view.php" class="btn btn-warning">
-                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
+                    Winkelmandje (<?php echo isset($_SESSION['cart']) ? array_sum(array_map(fn($item) => intval($item['quantity']), $_SESSION['cart'])) : 0; ?>)
                 </a>
             </div>
         </div>
     </nav>
-
-    <!-- Modals -->
-
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="change_password.php">
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" name="current_password" id="currentPassword" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" name="new_password" id="newPassword" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                            <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Change Password</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Winkelmandje -->
     <div class="container mt-5">
@@ -171,13 +140,13 @@ if (isset($_SESSION['user_id'])) {
         <!-- Meldingen -->
         <?php if (!empty($successMessage)): ?>
             <div class="alert alert-success">
-                <?php echo $successMessage; ?>
+                <?php echo htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8'); ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($errorMessage)): ?>
             <div class="alert alert-danger">
-                <?php echo $errorMessage; ?>
+                <?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?>
             </div>
         <?php endif; ?>
 
@@ -197,19 +166,19 @@ if (isset($_SESSION['user_id'])) {
                         <?php
                         $total = 0;
                         foreach ($_SESSION['cart'] as $item):
-                            $subtotal = $item['price'] * $item['quantity'];
+                            $subtotal = floatval($item['price']) * intval($item['quantity']);
                             $total += $subtotal;
                         ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($item['title']); ?></td>
-                                <td>€ <?php echo number_format($item['price'], 2); ?></td>
+                                <td><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td>€ <?php echo number_format(floatval($item['price']), 2); ?></td>
                                 <td>
-                                    <?php echo $item['quantity']; ?>
+                                    <?php echo intval($item['quantity']); ?>
                                 </td>
                                 <td>€ <?php echo number_format($subtotal, 2); ?></td>
                                 <td>
                                     <form method="post" style="display: inline-block;">
-                                        <input type="hidden" name="product_id" value="<?php echo $item['id']; ?>">
+                                        <input type="hidden" name="product_id" value="<?php echo intval($item['id']); ?>">
                                         <button type="submit" name="remove_item" class="btn btn-danger">Verwijderen</button>
                                     </form>
                                 </td>

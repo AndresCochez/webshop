@@ -16,12 +16,12 @@ if (!empty($searchQuery)) {
 }
 if (!empty($selectedCategory) && is_numeric($selectedCategory)) {
     $query .= " AND p.category_id = ?";
-    $params[] = $selectedCategory;
+    $params[] = intval($selectedCategory); // Zorg dat category_id een integer is
 }
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
-$products = $stmt->fetchAll();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!-- Zoek- en sorteerbalk -->
@@ -33,9 +33,9 @@ $products = $stmt->fetchAll();
                     <option value="">All Categories</option>
                     <?php
                     $categories = $pdo->query("SELECT id, name FROM categories");
-                    while ($category = $categories->fetch()) {
-                        $selected = $selectedCategory == $category['id'] ? "selected" : "";
-                        echo "<option value='{$category['id']}' $selected>{$category['name']}</option>";
+                    while ($category = $categories->fetch(PDO::FETCH_ASSOC)) {
+                        $selected = intval($selectedCategory) === intval($category['id']) ? "selected" : "";
+                        echo "<option value='" . htmlspecialchars($category['id'], ENT_QUOTES, 'UTF-8') . "' $selected>" . htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') . "</option>";
                     }
                     ?>
                 </select>
@@ -45,7 +45,7 @@ $products = $stmt->fetchAll();
     <div class="col-md-6">
         <form method="get">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by title or description" value="<?= htmlspecialchars($searchQuery) ?>">
+                <input type="text" name="search" class="form-control" placeholder="Search by title or description" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
                 <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </form>
@@ -60,15 +60,15 @@ $products = $stmt->fetchAll();
             echo "
             <div class='col-md-4 mb-3'>
                 <div class='card'>
-                    <a href='product_details.php?id={$product['id']}' style='text-decoration: none; color: inherit;'>
+                    <a href='product_details.php?id=" . intval($product['id']) . "' style='text-decoration: none; color: inherit;'>
                         <div class='image-wrapper' style='height: 200px; overflow: hidden;'>
-                            <img src='{$product['image']}' class='card-img-top' alt='{$product['title']}' style='width: 100%; height: 100%; object-fit: cover;'>
+                            <img src='" . htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') . "' class='card-img-top' alt='" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "' style='width: 100%; height: 100%; object-fit: cover;'>
                         </div>
                         <div class='card-body'>
-                            <h5 class='card-title'>{$product['title']}</h5>
-                            <p class='card-text'>{$product['description']}</p>
-                            <p class='card-text'><strong>Price:</strong> € {$product['price']}</p>
-                            <p class='card-text'><small class='text-muted'>Category: {$product['category_name']}</small></p>
+                            <h5 class='card-title'>" . htmlspecialchars($product['title'], ENT_QUOTES, 'UTF-8') . "</h5>
+                            <p class='card-text'>" . htmlspecialchars($product['description'], ENT_QUOTES, 'UTF-8') . "</p>
+                            <p class='card-text'><strong>Price:</strong> € " . number_format(floatval($product['price']), 2) . "</p>
+                            <p class='card-text'><small class='text-muted'>Category: " . htmlspecialchars($product['category_name'], ENT_QUOTES, 'UTF-8') . "</small></p>
                         </div>
                     </a>
                 </div>

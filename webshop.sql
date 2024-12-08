@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Gegenereerd op: 05 dec 2024 om 16:55
--- Serverversie: 10.4.32-MariaDB
--- PHP-versie: 8.2.12
+-- Host: com-linweb882.srv.combell-ops.net:3306
+-- Gegenereerd op: 08 dec 2024 om 22:17
+-- Serverversie: 8.0.36-28
+-- PHP-versie: 7.4.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `webshop`
+-- Database: `ID437099_webshopvolledig`
 --
 
 -- --------------------------------------------------------
@@ -28,8 +28,8 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -49,10 +49,17 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 --
 
 CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `created_at`) VALUES
+(17, 2, '2024-12-08 21:14:39');
 
 -- --------------------------------------------------------
 
@@ -61,11 +68,18 @@ CREATE TABLE `orders` (
 --
 
 CREATE TABLE `order_items` (
-  `id` int(11) NOT NULL,
-  `order_id` int(11) DEFAULT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `quantity` int(11) NOT NULL
+  `id` int NOT NULL,
+  `order_id` int DEFAULT NULL,
+  `product_id` int DEFAULT NULL,
+  `quantity` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`) VALUES
+(15, 17, 17, 1);
 
 -- --------------------------------------------------------
 
@@ -74,21 +88,22 @@ CREATE TABLE `order_items` (
 --
 
 CREATE TABLE `products` (
-  `id` int(11) NOT NULL,
-  `title` varchar(100) NOT NULL,
-  `description` text DEFAULT NULL,
-  `price` decimal(10,2) NOT NULL CHECK (`price` >= 0),
-  `image` varchar(255) DEFAULT NULL,
-  `category_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL,
+  `title` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `price` decimal(10,2) NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `category_id` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
 
 --
 -- Gegevens worden geëxporteerd voor tabel `products`
 --
 
 INSERT INTO `products` (`id`, `title`, `description`, `price`, `image`, `category_id`, `created_at`) VALUES
-(14, 'Test', 'Test', 5.00, 'C:\\xampp\\htdocs\\webshopvolledig/uploads/Gray_Background_Question_Mark.png', 4, '2024-11-26 20:48:23');
+(17, 'vczefeéd', 'cdcdaezd', 3.99, '/data/sites/web/little-sunbe/www/uploads/screenshot (11).png', 1, '2024-12-08 21:09:37'),
+(18, 'sgerg', 'sdgferge', 3.99, '/data/sites/web/little-sunbe/www/uploads/screenshot (11).png', 3, '2024-12-08 21:16:36');
 
 -- --------------------------------------------------------
 
@@ -97,7 +112,7 @@ INSERT INTO `products` (`id`, `title`, `description`, `price`, `image`, `categor
 -- (Zie onder voor de actuele view)
 --
 CREATE TABLE `product_details` (
-`id` int(11)
+`id` int
 ,`title` varchar(100)
 ,`description` text
 ,`price` decimal(10,2)
@@ -112,13 +127,13 @@ CREATE TABLE `product_details` (
 --
 
 CREATE TABLE `reviews` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
-  `comment` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL,
+  `product_id` int DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `rating` int DEFAULT NULL,
+  `comment` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
 
 -- --------------------------------------------------------
 
@@ -127,13 +142,13 @@ CREATE TABLE `reviews` (
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `balance` decimal(10,2) DEFAULT 1000.00,
-  `is_admin` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `balance` decimal(10,2) DEFAULT '1000.00',
+  `is_admin` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -142,7 +157,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `balance`, `is_admin`, `created_at`) VALUES
 (1, 'admin', 'admin@admin.com', '$2y$10$Aqjx9cUiPOrE/plYXr.tVe35skZpdg8ut7IgKQEP3OXgdlx1ECl0S', 1000.00, 0, '2024-11-25 16:36:38'),
-(2, 'user', 'user@user.com', '$2y$10$0eLoRYPVMoj6EN667crOQedrmZEjDfuB6iZsfdbx5Gcn8puuMLo2y', 1000.00, 0, '2024-11-25 21:52:11');
+(2, 'user', 'user@user.com', '$2y$10$0eLoRYPVMoj6EN667crOQedrmZEjDfuB6iZsfdbx5Gcn8puuMLo2y', 996.01, 0, '2024-11-25 21:52:11');
 
 -- --------------------------------------------------------
 
@@ -151,7 +166,7 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `balance`, `is_admin
 --
 DROP TABLE IF EXISTS `product_details`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `product_details`  AS SELECT `p`.`id` AS `id`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`price` AS `price`, `p`.`image` AS `image`, `c`.`name` AS `category_name` FROM (`products` `p` left join `categories` `c` on(`p`.`category_id` = `c`.`id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`ID437099_webshopvolledig`@`%` SQL SECURITY DEFINER VIEW `product_details`  AS SELECT `p`.`id` AS `id`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`price` AS `price`, `p`.`image` AS `image`, `c`.`name` AS `category_name` FROM (`products` `p` left join `categories` `c` on((`p`.`category_id` = `c`.`id`))) ;
 
 --
 -- Indexen voor geëxporteerde tabellen
@@ -209,37 +224,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT voor een tabel `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT voor een tabel `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT voor een tabel `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT voor een tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT voor een tabel `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT voor een tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Beperkingen voor geëxporteerde tabellen

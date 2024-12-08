@@ -8,7 +8,8 @@ $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $product = null;
 
 if ($productId > 0) {
-    $stmt = $pdo->prepare("SELECT p.*, c.name AS category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
+    // Gebruik de product_details-view voor eenvoudiger ophalen van gegevens
+    $stmt = $pdo->prepare("SELECT * FROM product_details WHERE id = ?");
     $stmt->execute([$productId]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 }
